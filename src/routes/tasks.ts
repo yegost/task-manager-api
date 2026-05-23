@@ -53,4 +53,27 @@ router.get('/:id', async (req, res) => {
     }
 })
 
+router.put("/:id", async (req: Request & {
+    body: {
+        title: string;
+        description: string;
+        completed: boolean;
+    }
+}, res: Response) => {
+    const { id } = req.params
+    const { title, description, completed } = req.body
+
+    try {
+        const { rows } = await pool.query("UPDATE tasks SET title=$1, description=$2, completed=$3 WHERE id=$4 RETURNING *", [title, description, completed, id])
+
+        if (rows[0] === undefined) {
+            return res.status(404).json({ error: "Task was not found"})
+        }
+
+        res.status(200).json(rows[0])
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" })
+    }
+})
+
 export default router;
