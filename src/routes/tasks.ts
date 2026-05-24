@@ -76,4 +76,20 @@ router.put("/:id", async (req: Request & {
     }
 })
 
+router.delete("/:id", async (req, res) => {
+    const { id } = req.params
+
+    try {
+        const { rows } = await pool.query("DELETE FROM tasks WHERE id = $1 RETURNING *", [id])
+
+        if (rows[0] === undefined) {
+            return res.status(404).json({ error: "Task was not found" })
+        }
+
+        res.status(204).send()
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" })
+    }
+})
+
 export default router;
