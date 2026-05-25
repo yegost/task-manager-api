@@ -1,10 +1,10 @@
-import express from "express"
-import { Router, Request, Response } from "express"
+import express, { Request, Response } from "express"
+import { CreateTaskBody, UpdateTaskBody } from "../types/task"
 import pool from "../db"
 
 const router = express.Router()
 
-router.get("/", async (req, res) => {
+router.get("/", async (_req, res) => {
     try {
         const { rows } = await pool.query("SELECT * FROM tasks")
         res.json(rows)
@@ -13,12 +13,7 @@ router.get("/", async (req, res) => {
     }
 })
 
-router.post('/', async (req: Request & {
-    body: {
-        title: string;
-        description: string;
-    }
-}, res: Response) => {
+router.post('/', async (req: Request<{}, {}, CreateTaskBody>, res: Response) => {
     try {
         const { title, description} = req.body
 
@@ -53,13 +48,7 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-router.put("/:id", async (req: Request & {
-    body: {
-        title: string;
-        description: string;
-        completed: boolean;
-    }
-}, res: Response) => {
+router.put("/:id", async (req: Request<{ id: string }, {}, UpdateTaskBody>, res: Response) => {
     const { id } = req.params
     const { title, description, completed } = req.body
 
