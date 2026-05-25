@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express"
 import { CreateTaskBody, UpdateTaskBody } from "../types/task"
+import { validateCreateTask } from "../middleware/validate"
 import pool from "../db"
 
 const router = express.Router()
@@ -13,13 +14,9 @@ router.get("/", async (_req, res) => {
     }
 })
 
-router.post('/', async (req: Request<{}, {}, CreateTaskBody>, res: Response) => {
+router.post('/', validateCreateTask , async (req: Request<{}, {}, CreateTaskBody>, res: Response) => {
     try {
         const { title, description} = req.body
-
-        if (!title || !description) {
-            return res.status(400).json({ error: "Missing required fields"})
-        }
 
         const { rows } = await pool.query(
             `INSERT INTO tasks (title, description) VALUES ($1, $2) RETURNING *`,
