@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express"
 import { CreateTaskBody, UpdateTaskBody } from "../types/task"
-import { validateCreateTask } from "../middleware/validate"
+import { validateCreateTask, validateUpdateTask } from "../middleware/validate"
 import pool from "../db"
 
 const router = express.Router()
@@ -45,16 +45,12 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-router.put("/:id", async (req: Request<{ id: string }, {}, UpdateTaskBody>, res: Response) => {
+router.put("/:id", validateUpdateTask , async (req: Request<{ id: string }, {}, UpdateTaskBody>, res: Response) => {
     const { id } = req.params
     const { title, description, completed } = req.body
 
     try {
         const { rows } = await pool.query("UPDATE tasks SET title=$1, description=$2, completed=$3 WHERE id=$4 RETURNING *", [title, description, completed, id])
-
-        if (rows[0] === undefined) {
-            return res.status(404).json({ error: "Task was not found"})
-        }
 
         res.status(200).json(rows[0])
     } catch (error) {
